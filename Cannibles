@@ -1,0 +1,94 @@
+from queue import PriorityQueue
+from typing import List, Tuple, Set
+
+class State:
+    def __init__(self, m_left: int, c_left: int, boat: bool, m_right: int, c_right: int, path: List = None):
+        self.m_left = m_left
+        self.c_left = c_left
+        self.boat = boat  # True if boat on left side
+        self.m_right = m_right
+        self.c_right = c_right
+        self.path = path if path else []
+        
+    def is_valid(self) -> bool:
+        # Check if missionaries are outnumbered on either side
+        if self.m_left < 0 or self.c_left < 0 or self.m_right < 0 or self.c_right < 0:
+            return False
+        if (self.m_left and self.m_left < self.c_left) or (self.m_right and self.m_right < self.c_right):
+            return False
+        return True
+    
+    def is_goal(self) -> bool:
+        return self.m_left == 0 and self.c_left == 0
+    
+    def __lt__(self, other):
+        # Heuristic: prefer states with more people on right side
+        return (self.m_right + self.c_right) > (other.m_right + other.c_right)
+    
+    def __eq__(self, other):
+        return (self.m_left, self.c_left, self.boat, self.m_right, self.c_right) == \
+               (other.m_left, other.c_left, other.boat, other.m_right, other.c_right)
+    
+    def __hash__(self):
+        return hash((self.m_left, self.c_left, self.boat, self.m_right, self.c_right))
+    
+    def __str__(self):
+        side = "left" if self.boat else "right"
+        return f"Left(M:{self.m_left},C:{self.c_left}) Boat:{side} Right(M:{self.m_right},C:{self.c_right})"
+
+def get_possible_moves() -> List[Tuple[int, int]]:
+    # All possible combinations of missionaries and cannibals that can move
+    return [(1,0), (2,0), (0,1), (0,2), (1,1)]
+
+def solve_missionaries_cannibals(initial_state: State) -> List[State]:
+    frontier = PriorityQueue()
+    frontier.put((0, initial_state))
+    explored = set()
+    
+    while not frontier.empty():
+        _, current = frontier.get()
+        
+        if current.is_goal():
+            return current.path + [current]
+            
+        explored.add(current)
+        
+        for m, c in get_possible_moves():
+            if current.boat:  # Boat is on left side
+                new_state = State(
+                    current.m_left - m,
+                    current.c_left - c,
+                    False,
+                    current.m_right + m,
+                    current.c_right + c,
+                    current.path + [current]
+                )
+            else:  # Boat is on right side
+                new_state = State(
+                    current.m_left + m,
+                    current.c_left + c,
+                    True,
+                    current.m_right - m,
+                    current.c_right - c,
+                    current.path + [current]
+                )
+                
+            if new_state.is_valid() and new_state not in explored:
+                frontier.put((len(new_state.path), new_state))
+    
+    return []
+
+def main():
+    # Initial state: 3 missionaries and 3 cannibals on left side
+    initial_state = State(3, 3, True, 0, 0)
+    solution = solve_missionaries_cannibals(initial_state)
+    
+    if solution:
+        print("Solution found! Steps:")
+        for i, state in enumerate(solution):
+            print(f"Step {i}: {state}")
+    else:
+        print("No solution found!")
+
+if __name__ == "__main__":
+    main()
