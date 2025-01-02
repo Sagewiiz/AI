@@ -1,0 +1,38 @@
+board = [' ' for _ in range(9)]
+player = 'X'
+
+def show():
+    for i in range(0, 9, 3):
+        print(f"{board[i]}|{board[i+1]}|{board[i+2]}")
+        if i < 6:
+            print("-+-+-")
+
+def win():
+    wins = [(0,1,2), (3,4,5), (6,7,8), (0,3,6), (1,4,7), (2,5,8), (0,4,8), (2,4,6)]
+    return any(board[a] == board[b] == board[c] != ' ' for a,b,c in wins)
+
+def play():
+    global player
+    while True:
+        show()
+        try:
+            move = int(input(f"Player {player} (1-9): ")) - 1
+            if 0 <= move < 9 and board[move] == ' ':
+                board[move] = player
+                if win():
+                    show()
+                    print(f"Player {player} wins!")
+                    break
+                if ' ' not in board:
+                    show()
+                    print("Draw!")
+                    break
+                player = 'O' if player == 'X' else 'X'
+            else:
+                print("Invalid move!")
+        except ValueError:
+            print("Enter a number between 1-9!")
+
+if __name__ == '__main__':
+    print("Positions:\n1|2|3\n-+-+-\n4|5|6\n-+-+-\n7|8|9\n")
+    play()
