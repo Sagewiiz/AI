@@ -1,0 +1,30 @@
+max1 = int(input("Enter value of maxjug1: " ))
+max2 = int(input("Enter value of maxjug2: " ))
+goal = int(input("Enter value of Goal in jug1: " ))
+def water_jug(max1, max2, goal):
+    visited = set()
+    stack = [(0, 0)]
+    path = []
+    while stack:
+        x, y = stack.pop()
+        if (x, y) in visited:
+            continue
+        visited.add((x, y))
+        path.append((x,y))
+        if x == goal or y == goal:
+            print("Solution Found:")
+            for state in path:
+                print(f"( {state[0]} , {state[1]} )")
+            print(f"Path Cost: {len(path)}")
+            return
+        # Generate next states
+        stack.extend([
+            (max1, y),  # Fill jug 1
+            (x, max2),  # Fill jug 2
+            (0, y),     # Empty jug 1
+            (x, 0),     # Empty jug 2
+            (x - min(x, max2 - y), y + min(x, max2 - y)),  # Pour x into y
+            (x + min(y, max1 - x), y - min(y, max1 - x))   # Pour y into x
+        ])
+    print("No Solution")
+water_jug(max1, max2, goal)
