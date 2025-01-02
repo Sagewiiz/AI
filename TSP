@@ -1,0 +1,31 @@
+def solve_tsp(adj):
+    n = len(adj)
+    start = curr = 0
+    visited = {0}
+    path = [0]
+    cost = 0
+    
+    while len(visited) < n:
+        next_city = min(
+            ((j, adj[curr][j]) for j in range(n) 
+             if j not in visited and adj[curr][j] != 0),
+            key=lambda x: x[1]
+        )[0]
+        visited.add(next_city)
+        path.append(next_city)
+        cost += adj[curr][next_city]
+        curr = next_city
+    
+    cost += adj[curr][start]
+    path.append(start)
+    return cost, path
+
+# Test with given input
+adj = [[0, 4, 12, 7], 
+       [5, 0, 0, 18], 
+       [11, 0, 0, 6], 
+       [10, 2, 3, 0]]
+
+cost, path = solve_tsp(adj)
+print(f"Minimum cost: {cost}")
+print(f"Path Taken: {' '.join(map(str, path))}")
